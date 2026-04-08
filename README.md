@@ -1,13 +1,13 @@
 # WeatherHub System
 
-## 📌 Overview
+##  Overview
 WeatherHub is a PHP and MySQL web application developed for IT223 (Web System and Technologies).  
 It features user registration, login authentication, session management, and a structured folder architecture.  
 The system is designed to be scalable and prepared for future API integrations such as weather services.
 
 ---
 
-## 🚀 Features
+##  Features
 - User registration with input validation  
 - Secure login with password hashing  
 - Session-based authentication  
@@ -20,7 +20,7 @@ The system is designed to be scalable and prepared for future API integrations s
 
 ---
 
-## 📁 Folder Structure
+##  Folder Structure
 weatherhub/
 ├── app/
 │ ├── controllers/
@@ -36,7 +36,7 @@ weatherhub/
 ├── database/
 │ └── weatherhub.sql
 
-## ⚙️ How to Run
+##  How to Run
 
 1. Copy the `weatherhub` folder into your XAMPP `htdocs` directory.
 2. Start **Apache** and **MySQL** using XAMPP.
@@ -67,13 +67,13 @@ or (if using port 8080):
 
 ---
 
-## 🔐 Authentication
+##  Authentication
 The system uses **session-based authentication** to restrict access to protected pages.  
 Only logged-in users can access the dashboard and system features.
 
 ---
 
-## 🗄️ Database Design
+##  Database Design
 The database is **normalized** and uses **foreign keys** to maintain data integrity.
 
 Main tables:
@@ -86,13 +86,13 @@ This structure ensures scalability and supports future system enhancements.
 
 ---
 
-## 📊 Use Case Roles
+##  Use Case Roles
 
-### 👤 Guest
+###  Guest
 - Register  
 - Login  
 
-### 👤 User
+###  User
 - Login  
 - Logout  
 - View Dashboard  
@@ -101,7 +101,7 @@ This structure ensures scalability and supports future system enhancements.
 - View Search History  
 - Manage Preferences  
 
-### 👑 Admin (Future Role)
+###  Admin (Future Role)
 - Create User  
 - Read User  
 - Update User  
@@ -109,7 +109,7 @@ This structure ensures scalability and supports future system enhancements.
 
 ---
 
-## 🧠 Notes
+##  Notes
 - The weather module currently uses sample output.  
 - Future implementation can integrate real-time weather APIs.  
 - The system is designed with scalability in mind.
