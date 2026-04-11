@@ -6,6 +6,7 @@ require_once __DIR__ . '/../app/helpers/functions.php';
 
 $userModel = new User($pdo);
 $users = $userModel->getAllUsers();
+$currentAdminId = (int) $_SESSION['user']['user_id'];
 ?>
 <?php require_once __DIR__ . '/../resources/views/layouts/header.php'; ?>
 <?php require_once __DIR__ . '/../resources/views/layouts/navbar.php'; ?>
@@ -34,6 +35,8 @@ $users = $userModel->getAllUsers();
                             <th>Email</th>
                             <th>Role</th>
                             <th>Created At</th>
+                            <th style="width: 180px;">Role Action</th>
+                            <th style="width: 140px;">Delete</th>
                         </tr>
                     </thead>
                     <tbody>
@@ -44,13 +47,47 @@ $users = $userModel->getAllUsers();
                                     <td><?= e($user['full_name']) ?></td>
                                     <td><?= e($user['username']) ?></td>
                                     <td><?= e($user['email']) ?></td>
-                                    <td><?= e($user['role_name']) ?></td>
+                                    <td>
+                                        <?php if ($user['role_name'] === 'admin'): ?>
+                                            <span class="badge bg-warning text-dark">Admin</span>
+                                        <?php else: ?>
+                                            <span class="badge bg-secondary">User</span>
+                                        <?php endif; ?>
+                                    </td>
                                     <td><?= e($user['created_at']) ?></td>
+
+                                    <td>
+                                        <?php if ((int) $user['user_id'] === $currentAdminId): ?>
+                                            <span class="badge bg-info text-dark">Current Admin</span>
+                                        <?php else: ?>
+                                            <form method="POST" action="update_user_role.php">
+                                                <input type="hidden" name="user_id" value="<?= e((string) $user['user_id']) ?>">
+                                                <?php if ($user['role_name'] === 'admin'): ?>
+                                                    <input type="hidden" name="role_name" value="user">
+                                                    <button type="submit" class="btn btn-outline-primary btn-sm w-100">Set as User</button>
+                                                <?php else: ?>
+                                                    <input type="hidden" name="role_name" value="admin">
+                                                    <button type="submit" class="btn btn-primary btn-sm w-100">Set as Admin</button>
+                                                <?php endif; ?>
+                                            </form>
+                                        <?php endif; ?>
+                                    </td>
+
+                                    <td>
+                                        <?php if ((int) $user['user_id'] === $currentAdminId): ?>
+                                            <span class="badge bg-secondary">Protected</span>
+                                        <?php else: ?>
+                                            <form method="POST" action="delete_user.php" onsubmit="return confirm('Are you sure you want to delete this user?');">
+                                                <input type="hidden" name="user_id" value="<?= e((string) $user['user_id']) ?>">
+                                                <button type="submit" class="btn btn-danger btn-sm w-100">Delete</button>
+                                            </form>
+                                        <?php endif; ?>
+                                    </td>
                                 </tr>
                             <?php endforeach; ?>
                         <?php else: ?>
                             <tr>
-                                <td colspan="6" class="text-center">No users found.</td>
+                                <td colspan="8" class="text-center">No users found.</td>
                             </tr>
                         <?php endif; ?>
                     </tbody>

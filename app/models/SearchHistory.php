@@ -15,7 +15,7 @@ class SearchHistory
         return $stmt->fetchAll();
     }
 
-    public function create(int $userId, string $cityName): void
+    public function add(int $userId, string $cityName): void
     {
         $stmt = $this->pdo->prepare('INSERT INTO search_history (user_id, city_name) VALUES (:user_id, :city_name)');
         $stmt->execute([
