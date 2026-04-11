@@ -5,7 +5,7 @@
     <div class="container">
         <div class="row align-items-center g-5">
             <div class="col-lg-7">
-                <span class="eyebrow">MIDTERM-READY WEATHER SYSTEM</span>
+                <span class="eyebrow">WEATHERHUB</span>
                 <h1 class="display-4 fw-bold mb-3">Secure login, clean architecture, and a future-ready database.</h1>
                 <p class="lead text-white-50 mb-4">WeatherHub is a web-based weather information system built for IT223. It demonstrates registration, login, authentication, separation of concerns, and scalable MySQL design.</p>
                 <div class="d-flex flex-wrap gap-3">

@@ -22,7 +22,6 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                     <div class="text-center mb-4">
                         <span class="eyebrow text-primary">REGISTER</span>
                         <h2 class="fw-bold mt-2">Create your WeatherHub account</h2>
-                        <p class="text-muted mb-0">Use your own original design and complete the required validation.</p>
                     </div>
                     <?php require __DIR__ . '/../resources/views/partials/alerts.php'; ?>
                     <form method="POST" novalidate>

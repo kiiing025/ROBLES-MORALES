@@ -15,4 +15,22 @@ class UserPreference
         $row = $stmt->fetch();
         return $row ?: null;
     }
+
+    public function updateByUser(int $userId, string $temperatureUnit, string $windUnit, string $themeMode): void
+    {
+        $stmt = $this->pdo->prepare('
+            UPDATE user_preferences
+            SET temperature_unit = :temperature_unit,
+                wind_unit = :wind_unit,
+                theme_mode = :theme_mode
+            WHERE user_id = :user_id
+        ');
+
+        $stmt->execute([
+            'temperature_unit' => $temperatureUnit,
+            'wind_unit' => $windUnit,
+            'theme_mode' => $themeMode,
+            'user_id' => $userId,
+        ]);
+    }
 }
