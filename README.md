@@ -1,33 +1,124 @@
-# WeatherHub
+# WeatherHub System
 
-WeatherHub is a midterm-ready PHP and MySQL project for IT223. It includes working login and registration, session authentication, protected pages, a clean folder structure, and a normalized database designed for future weather features.
+##  Overview
+WeatherHub is a PHP and MySQL web application developed for IT223 (Web System and Technologies).  
+It features user registration, login authentication, session management, and a structured folder architecture.  
+The system is designed to be scalable and prepared for future API integrations such as weather services.
 
-## Features
-- User registration with validation
-- Secure login with password hashing
-- Session-based authentication
-- Protected dashboard
-- Weather search module scaffold
-- Saved locations
-- Search history
-- User preferences
-- Original custom UI design
+---
 
-## Folder Structure
-- `app/` - controllers, models, middleware, helpers, config
-- `public/` - public pages and assets
-- `resources/views/` - shared layouts and partials
-- `database/` - SQL schema
-- `docs/` - use case notes
+##  Features
+- User registration with input validation  
+- Secure login with password hashing  
+- Session-based authentication  
+- Protected dashboard (authorized access only)  
+- Weather search module (scaffold)  
+- Saved locations  
+- Search history tracking  
+- User preferences  
+- Original custom UI design  
 
-## How to Run
-1. Copy the `weatherhub` folder into `htdocs`.
-2. Start Apache and MySQL in XAMPP.
-3. Create a database named `weatherhub` in phpMyAdmin.
-4. Import `database/weatherhub.sql`.
-5. If your MySQL credentials are different, update `app/config/database.php`.
-6. Open `http://localhost/weatherhub/public/` or `http://localhost:8080/weatherhub/public/` depending on your Apache port.
+---
 
-## Notes
-- For the midterm, the weather module uses sample output and stores search activity.
-- For the final phase, replace the sample weather output with real API integration.
+##  Folder Structure
+weatherhub/
+├── app/
+│ ├── controllers/
+│ ├── models/
+│ ├── middleware/
+│ ├── helpers/
+│ └── config/
+├── public/
+│ ├── assets/
+│ └── *.php
+├── resources/
+│ └── views/
+├── database/
+│ └── weatherhub.sql
+
+##  How to Run
+
+1. Copy the `weatherhub` folder into your XAMPP `htdocs` directory.
+2. Start **Apache** and **MySQL** using XAMPP.
+3. Open phpMyAdmin in your browser:
+
+http://localhost/phpmyadmin
+
+4. Create a database named:
+
+- weatherhub
+
+5. Import the file:
+
+- database/weatherhub.sql
+
+6. If needed, configure database connection in:
+
+- app/config/database.php
+
+7. Open the system in your browser:
+
+- http://localhost/weatherhub/public/
+
+or (if using port 8080):
+
+- http://localhost:8080/weatherhub/public/
+
+
+---
+
+##  Authentication
+The system uses **session-based authentication** to restrict access to protected pages.  
+Only logged-in users can access the dashboard and system features.
+
+---
+
+##  Database Design
+The database is **normalized** and uses **foreign keys** to maintain data integrity.
+
+Main tables:
+- users  
+- saved_locations  
+- search_history  
+- user_preferences  
+
+This structure ensures scalability and supports future system enhancements.
+
+---
+
+##  Use Case Roles
+
+###  Guest
+- Register  
+- Login  
+
+###  User
+- Login  
+- Logout  
+- View Dashboard  
+- Search Weather  
+- Save Location  
+- View Search History  
+- Manage Preferences  
+
+###  Admin (Future Role)
+- Create User  
+- Read User  
+- Update User  
+- Delete User  
+
+---
+
+##  Notes
+- The weather module currently uses sample output.  
+- Future implementation can integrate real-time weather APIs.  
+- The system is designed with scalability in mind.
+
+---
+
+## 👨‍💻 Developer
+King Josh Robles & Jhon Owen Morales  
+BS Information Technology
+IT223 – Web System and Technologies  
+
+---
