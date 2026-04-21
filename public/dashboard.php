@@ -1,12 +1,16 @@
 <?php
+
 require_once __DIR__ . '/../app/middleware/auth.php';
 require_once __DIR__ . '/../app/config/database.php';
 require_once __DIR__ . '/../app/controllers/DashboardController.php';
 require_once __DIR__ . '/../app/models/UserPreference.php';
+require_once __DIR__ . '/../app/models/Alert.php';
 require_once __DIR__ . '/../app/helpers/functions.php';
 
 $userId = (int) $_SESSION['user']['user_id'];
+
 $preferenceModel = new UserPreference($pdo);
+$alertModel = new Alert($pdo);
 
 if ($_SERVER['REQUEST_METHOD'] === 'POST' && ($_POST['action'] ?? '') === 'update_preferences') {
     $temperatureUnit = in_array($_POST['temperature_unit'] ?? 'C', ['C', 'F'], true) ? $_POST['temperature_unit'] : 'C';
@@ -14,13 +18,17 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && ($_POST['action'] ?? '') === 'updat
     $themeMode = in_array($_POST['theme_mode'] ?? 'light', ['light', 'dark'], true) ? $_POST['theme_mode'] : 'light';
 
     $preferenceModel->updateByUser($userId, $temperatureUnit, $windUnit, $themeMode);
+
     setFlash('success', 'Preferences updated successfully.');
     redirect('dashboard.php');
 }
 
 $controller = new DashboardController($pdo);
 $data = $controller->getDashboardData($userId);
+$alerts = $alertModel->getUserAlerts($userId);
+
 ?>
+
 <?php require_once __DIR__ . '/../resources/views/layouts/header.php'; ?>
 <?php require_once __DIR__ . '/../resources/views/layouts/navbar.php'; ?>
 
@@ -32,7 +40,11 @@ $data = $controller->getDashboardData($userId);
             <h2 class="fw-bold mb-1">Dashboard</h2>
             <p class="text-muted mb-0">Welcome, <?= e($_SESSION['user']['full_name']) ?>.</p>
         </div>
-        <a href="weather.php" class="btn btn-primary">Open Weather Page</a>
+
+        <div class="d-flex gap-2">
+            <a href="alerts.php" class="btn btn-outline-primary">Manage Alerts</a>
+            <a href="weather.php" class="btn btn-primary">Open Weather Page</a>
+        </div>
     </div>
 
     <div class="row g-4">
@@ -51,7 +63,9 @@ $data = $controller->getDashboardData($userId);
             <div class="card shadow-sm border-0 rounded-4 h-100">
                 <div class="card-body">
                     <h5>Preferences</h5>
+
                     <?php $preferences = $data['preferences']; ?>
+
                     <?php if ($preferences): ?>
                         <form method="POST" class="mt-3">
                             <input type="hidden" name="action" value="update_preferences">
@@ -93,6 +107,7 @@ $data = $controller->getDashboardData($userId);
             <div class="card shadow-sm border-0 rounded-4 h-100">
                 <div class="card-body">
                     <h5>Saved Locations</h5>
+
                     <?php if (!empty($data['saved_locations'])): ?>
                         <ul class="mb-0">
                             <?php foreach ($data['saved_locations'] as $location): ?>
@@ -109,7 +124,40 @@ $data = $controller->getDashboardData($userId);
         <div class="col-12">
             <div class="card shadow-sm border-0 rounded-4">
                 <div class="card-body">
+                    <div class="d-flex justify-content-between align-items-center mb-3">
+                        <h5 class="mb-0">Active Alerts</h5>
+                        <a href="alerts.php" class="btn btn-sm btn-outline-primary">Add Alert</a>
+                    </div>
+
+                    <?php if (!empty($alerts)): ?>
+                        <div class="row g-3">
+                            <?php foreach ($alerts as $alert): ?>
+                                <div class="col-md-6 col-lg-4">
+                                    <div class="border rounded-3 p-3 h-100 bg-light">
+                                        <p class="mb-1 fw-semibold"><?= e(ucfirst($alert['condition_type'])) ?> Alert</p>
+                                        <p class="mb-1 text-dark"><?= e($alert['city']) ?></p>
+
+                                        <?php if (!empty($alert['threshold_value'])): ?>
+                                            <small class="text-muted">Threshold: <?= e($alert['threshold_value']) ?></small>
+                                        <?php else: ?>
+                                            <small class="text-muted">No threshold value set</small>
+                                        <?php endif; ?>
+                                    </div>
+                                </div>
+                            <?php endforeach; ?>
+                        </div>
+                    <?php else: ?>
+                        <p class="text-muted mb-0">No active alerts yet.</p>
+                    <?php endif; ?>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-12">
+            <div class="card shadow-sm border-0 rounded-4">
+                <div class="card-body">
                     <h5>Recent Search History</h5>
+
                     <?php if (!empty($data['search_history'])): ?>
                         <div class="table-responsive">
                             <table class="table table-striped">
