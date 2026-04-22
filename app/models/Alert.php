@@ -9,132 +9,137 @@ class Alert
         $this->pdo = $pdo;
     }
 
-    public function create(int $userId, string $city, string $conditionType, ?float $thresholdValue = null): bool
-    {
-        $sql = "
-            INSERT INTO alerts (user_id, city, condition_type, threshold_value, is_active, created_at)
-            VALUES (:user_id, :city, :condition_type, :threshold_value, 1, NOW())
-        ";
-
-        $stmt = $this->pdo->prepare($sql);
+    public function create(
+        int $userId,
+        string $city,
+        string $conditionType,
+        ?float $thresholdValue = null,
+        bool $emailEnabled = false
+    ): bool {
+        $stmt = $this->pdo->prepare("
+            INSERT INTO alerts (
+                user_id,
+                city,
+                condition_type,
+                threshold_value,
+                is_triggered,
+                last_triggered_at,
+                email_enabled,
+                last_email_sent_at,
+                created_at
+            )
+            VALUES (
+                :user_id,
+                :city,
+                :condition_type,
+                :threshold_value,
+                0,
+                NULL,
+                :email_enabled,
+                NULL,
+                NOW()
+            )
+        ");
 
         return $stmt->execute([
-            ':user_id' => $userId,
-            ':city' => trim($city),
-            ':condition_type' => $conditionType,
-            ':threshold_value' => $thresholdValue,
+            'user_id' => $userId,
+            'city' => $city,
+            'condition_type' => $conditionType,
+            'threshold_value' => $thresholdValue,
+            'email_enabled' => $emailEnabled ? 1 : 0
         ]);
     }
 
     public function getUserAlerts(int $userId): array
     {
-        $sql = "
-            SELECT alert_id, user_id, city, condition_type, threshold_value, is_active, created_at
+        $stmt = $this->pdo->prepare("
+            SELECT *
             FROM alerts
             WHERE user_id = :user_id
-              AND is_active = 1
-            ORDER BY created_at DESC, alert_id DESC
-        ";
+            ORDER BY is_triggered DESC, created_at DESC, alert_id DESC
+        ");
 
-        $stmt = $this->pdo->prepare($sql);
         $stmt->execute([
-            ':user_id' => $userId,
+            'user_id' => $userId
         ]);
 
-        return $stmt->fetchAll();
+        return $stmt->fetchAll(PDO::FETCH_ASSOC);
     }
 
-    public function getAllUserAlerts(int $userId): array
+    public function getUserAlertsByCity(int $userId, string $city): array
     {
-        $sql = "
-            SELECT alert_id, user_id, city, condition_type, threshold_value, is_active, created_at
+        $stmt = $this->pdo->prepare("
+            SELECT *
             FROM alerts
             WHERE user_id = :user_id
+              AND LOWER(city) = LOWER(:city)
             ORDER BY created_at DESC, alert_id DESC
-        ";
+        ");
 
-        $stmt = $this->pdo->prepare($sql);
         $stmt->execute([
-            ':user_id' => $userId,
+            'user_id' => $userId,
+            'city' => $city
         ]);
 
-        return $stmt->fetchAll();
+        return $stmt->fetchAll(PDO::FETCH_ASSOC);
     }
 
-    public function findById(int $alertId, int $userId): ?array
+    public function updateTriggerStatus(int $alertId, int $userId, bool $isTriggered): bool
     {
-        $sql = "
-            SELECT alert_id, user_id, city, condition_type, threshold_value, is_active, created_at
-            FROM alerts
+        if ($isTriggered) {
+            $stmt = $this->pdo->prepare("
+                UPDATE alerts
+                SET is_triggered = 1,
+                    last_triggered_at = NOW()
+                WHERE alert_id = :alert_id
+                  AND user_id = :user_id
+            ");
+
+            return $stmt->execute([
+                'alert_id' => $alertId,
+                'user_id' => $userId
+            ]);
+        }
+
+        $stmt = $this->pdo->prepare("
+            UPDATE alerts
+            SET is_triggered = 0
             WHERE alert_id = :alert_id
               AND user_id = :user_id
-            LIMIT 1
-        ";
+        ");
 
-        $stmt = $this->pdo->prepare($sql);
-        $stmt->execute([
-            ':alert_id' => $alertId,
-            ':user_id' => $userId,
+        return $stmt->execute([
+            'alert_id' => $alertId,
+            'user_id' => $userId
         ]);
+    }
 
-        $alert = $stmt->fetch();
+    public function markEmailSent(int $alertId, int $userId): bool
+    {
+        $stmt = $this->pdo->prepare("
+            UPDATE alerts
+            SET last_email_sent_at = NOW()
+            WHERE alert_id = :alert_id
+              AND user_id = :user_id
+        ");
 
-        return $alert ?: null;
+        return $stmt->execute([
+            'alert_id' => $alertId,
+            'user_id' => $userId
+        ]);
     }
 
     public function delete(int $alertId, int $userId): bool
     {
-        $sql = "
+        $stmt = $this->pdo->prepare("
             DELETE FROM alerts
             WHERE alert_id = :alert_id
               AND user_id = :user_id
-        ";
-
-        $stmt = $this->pdo->prepare($sql);
+        ");
 
         return $stmt->execute([
-            ':alert_id' => $alertId,
-            ':user_id' => $userId,
-        ]);
-    }
-
-    public function setActiveStatus(int $alertId, int $userId, bool $isActive): bool
-    {
-        $sql = "
-            UPDATE alerts
-            SET is_active = :is_active
-            WHERE alert_id = :alert_id
-              AND user_id = :user_id
-        ";
-
-        $stmt = $this->pdo->prepare($sql);
-
-        return $stmt->execute([
-            ':is_active' => $isActive ? 1 : 0,
-            ':alert_id' => $alertId,
-            ':user_id' => $userId,
-        ]);
-    }
-
-    public function update(int $alertId, int $userId, string $city, string $conditionType, ?float $thresholdValue = null): bool
-    {
-        $sql = "
-            UPDATE alerts
-            SET city = :city,
-                condition_type = :condition_type,
-                threshold_value = :threshold_value
-            WHERE alert_id = :alert_id
-              AND user_id = :user_id
-        ";
-
-        $stmt = $this->pdo->prepare($sql);
-
-        return $stmt->execute([
-            ':city' => trim($city),
-            ':condition_type' => $conditionType,
-            ':threshold_value' => $thresholdValue,
-            ':alert_id' => $alertId,
-            ':user_id' => $userId,
+            'alert_id' => $alertId,
+            'user_id' => $userId
         ]);
     }
 }

@@ -5,14 +5,17 @@ declare(strict_types=1);
 require_once __DIR__ . '/../config/database.php';
 require_once __DIR__ . '/../helpers/functions.php';
 require_once __DIR__ . '/../models/User.php';
+require_once __DIR__ . '/../models/UserPreference.php';
 
 class AuthController
 {
     private User $userModel;
+    private UserPreference $preferenceModel;
 
     public function __construct(PDO $pdo)
     {
         $this->userModel = new User($pdo);
+        $this->preferenceModel = new UserPreference($pdo);
     }
 
     public function register(array $data): void
@@ -76,6 +79,12 @@ class AuthController
 
     public function login(array $data): void
     {
+        if (isLoginBlocked()) {
+            $seconds = getRemainingBlockSeconds();
+            setFlash('danger', 'Too many failed login attempts. Please try again in ' . $seconds . ' seconds.');
+            redirect('login.php');
+        }
+
         $login = trim($data['login'] ?? '');
         $password = $data['password'] ?? '';
 
@@ -89,10 +98,12 @@ class AuthController
         $user = $this->userModel->findByEmailOrUsername($login);
 
         if (!$user || !password_verify($password, $user['password_hash'])) {
+            recordFailedLoginAttempt();
             setFlash('danger', 'Invalid login credentials.');
             redirect('login.php');
         }
 
+        clearLoginRateLimit();
         session_regenerate_id(true);
 
         $_SESSION['user'] = [
@@ -102,6 +113,9 @@ class AuthController
             'email' => $user['email'],
             'role' => $user['role_name']
         ];
+
+        $preferences = $this->preferenceModel->findByUser((int) $user['user_id']);
+        setThemeMode($preferences['theme_mode'] ?? 'light');
 
         clearOld();
 
@@ -130,6 +144,6 @@ class AuthController
         }
 
         session_destroy();
-        redirect('login.php');
+        redirect('index.php');
     }
 }
